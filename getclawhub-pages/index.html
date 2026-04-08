@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GetClawHub — OpenClaw，一键即用</title>
+
+<!-- Fonts: Bricolage Grotesque (display) + DM Sans (body) + JetBrains Mono (code) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   THEME: DEEP MINIMAL
+   Product: GetClawHub
+   Style: Apple Keynote / Vercel — dark, clean, high-contrast
+   ============================================================ */
+:root {
+    /* Colors */
+    --bg-deep:       #0a0a0a;
+    --bg-card:       #141414;
+    --bg-card-hover: #1a1a1a;
+    --accent:        #3ecf8e;
+    --accent-dim:    rgba(62, 207, 142, 0.15);
+    --accent-glow:   rgba(62, 207, 142, 0.08);
+    --text-light:    #ffffff;
+    --text-muted:    rgba(255, 255, 255, 0.45);
+    --text-body:     rgba(255, 255, 255, 0.72);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --red:           #ef4444;
+    --red-dim:       rgba(239, 68, 68, 0.12);
+
+    /* Fonts */
+    --font-display: 'Bricolage Grotesque', sans-serif;
+    --font-body:    'DM Sans', sans-serif;
+    --font-mono:    'JetBrains Mono', monospace;
+
+    /* Typography — clamp() for viewport scaling */
+    --title-size:  clamp(2.5rem, 7vw, 6rem);
+    --h2-size:     clamp(1.5rem, 4vw, 3rem);
+    --h3-size:     clamp(1rem, 2.2vw, 1.5rem);
+    --body-size:   clamp(0.75rem, 1.3vw, 1rem);
+    --small-size:  clamp(0.6rem, 0.9vw, 0.78rem);
+
+    /* Spacing — clamp() */
+    --slide-padding: clamp(1.5rem, 4vw, 4rem);
+    --content-gap:   clamp(0.75rem, 2vw, 2rem);
+    --elem-gap:      clamp(0.4rem, 1vw, 0.9rem);
+
+    /* Animation */
+    --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur:       0.6s;
+}
+
+/* === RESET === */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+
+/* ============================================================
+   VIEWPORT BASE — fits every slide to 100vh
+   ============================================================ */
+html, body { height: 100%; overflow-x: hidden; }
+html {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+}
+
+.slide {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--bg-deep);
+}
+
+.slide-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-height: 100%;
+    overflow: hidden;
+    padding: var(--slide-padding);
+}
+
+.card, .container, .content-box {
+    max-width: min(90vw, 1000px);
+    max-height: min(80vh, 700px);
+}
+
+img, .image-container {
+    max-width: 100%;
+    max-height: min(50vh, 400px);
+    object-fit: contain;
+}
+
+/* Responsive breakpoints */
+@media (max-height: 700px) {
+    :root {
+        --slide-padding: clamp(0.75rem, 3vw, 2rem);
+        --content-gap:   clamp(0.4rem, 1.5vw, 1rem);
+        --h2-size:       clamp(1rem, 3vw, 1.75rem);
+        --title-size:    clamp(1.5rem, 5vw, 3rem);
+    }
+}
+@media (max-height: 600px) {
+    :root {
+        --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+        --content-gap:   clamp(0.3rem, 1vw, 0.75rem);
+        --title-size:    clamp(1.25rem, 4vw, 2.5rem);
+        --body-size:     clamp(0.68rem, 1.2vw, 0.9rem);
+    }
+    .nav-dots, .decorative, .keyboard-hint { display: none; }
+}
+@media (max-height: 500px) {
+    :root {
+        --slide-padding: clamp(0.4rem, 2vw, 1rem);
+        --title-size:    clamp(1rem, 3.5vw, 1.5rem);
+        --h2-size:       clamp(0.9rem, 2.5vw, 1.25rem);
+        --body-size:     clamp(0.65rem, 1vw, 0.85rem);
+    }
+}
+@media (max-width: 600px) {
+    :root { --title-size: clamp(1.5rem, 8vw, 3rem); }
+    .two-col, .grid-3, .grid-4, .steps-row, .compare-row {
+        grid-template-columns: 1fr !important;
+        flex-direction: column !important;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+    html { scroll-behavior: auto; }
+}
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+body {
+    background: var(--bg-deep);
+    color: var(--text-light);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+.progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    width: 0%;
+    background: var(--accent);
+    z-index: 1000;
+    transition: width 0.4s var(--ease-expo);
+}
+
+/* ============================================================
+   NAVIGATION DOTS
+   ============================================================ */
+.nav-dots {
+    position: fixed;
+    right: clamp(0.6rem, 1.5vw, 1.2rem);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.3rem, 0.6vh, 0.5rem);
+    z-index: 999;
+}
+.nav-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    padding: 0;
+}
+.nav-dot.active {
+    background: var(--accent);
+    transform: scale(1.8);
+}
+
+/* ============================================================
+   SLIDE NUMBER
+   ============================================================ */
+.slide-num {
+    position: absolute;
+    top: var(--slide-padding);
+    left: var(--slide-padding);
+    font-family: var(--font-mono);
+    font-size: var(--small-size);
+    color: rgba(255, 255, 255, 0.18);
+    letter-spacing: 0.15em;
+    z-index: 2;
+}
+
+/* ============================================================
+   REVEAL ANIMATIONS
+   ============================================================ */
+.reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity var(--dur) var(--ease-expo),
+                transform var(--dur) var(--ease-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+
+.stagger > .reveal:nth-child(1)  { transition-delay: 0.05s; }
+.stagger > .reveal:nth-child(2)  { transition-delay: 0.12s; }
+.stagger > .reveal:nth-child(3)  { transition-delay: 0.19s; }
+.stagger > .reveal:nth-child(4)  { transition-delay: 0.26s; }
+.stagger > .reveal:nth-child(5)  { transition-delay: 0.33s; }
+.stagger > .reveal:nth-child(6)  { transition-delay: 0.40s; }
+.stagger > .reveal:nth-child(7)  { transition-delay: 0.47s; }
+.stagger > .reveal:nth-child(8)  { transition-delay: 0.54s; }
+
+.d1 { transition-delay: 0.05s !important; }
+.d2 { transition-delay: 0.12s !important; }
+.d3 { transition-delay: 0.19s !important; }
+.d4 { transition-delay: 0.26s !important; }
+.d5 { transition-delay: 0.33s !important; }
+.d6 { transition-delay: 0.40s !important; }
+
+/* ============================================================
+   REUSABLE COMPONENTS
+   ============================================================ */
+
+/* Label / eyebrow */
+.label {
+    font-family: var(--font-mono);
+    font-size: var(--small-size);
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: clamp(0.4rem, 1vh, 0.8rem);
+}
+
+/* Thin divider line */
+.divider {
+    width: clamp(30px, 5vw, 60px);
+    height: 1px;
+    background: var(--border-subtle);
+    margin: clamp(0.5rem, 1vh, 1rem) 0;
+}
+.divider.center { margin-left: auto; margin-right: auto; }
+.divider.accent { background: var(--accent); }
+
+/* Card */
+.m-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: clamp(1rem, 2vw, 1.5rem);
+    transition: border-color 0.3s;
+}
+.m-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Chip / badge */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-body);
+    font-family: var(--font-mono);
+    font-size: var(--small-size);
+    letter-spacing: 0.06em;
+    padding: 0.25em 0.75em;
+    border-radius: 100px;
+}
+.chip.green {
+    border-color: rgba(62, 207, 142, 0.3);
+    color: var(--accent);
+    background: var(--accent-dim);
+}
+
+/* Arrow list */
+.arrow-list { display: flex; flex-direction: column; gap: var(--elem-gap); }
+.arrow-list li {
+    display: flex; align-items: flex-start; gap: 0.65rem;
+    font-size: var(--body-size); color: var(--text-body); line-height: 1.55;
+}
+.arrow-list li::before {
+    content: ''; flex-shrink: 0;
+    width: 4px; height: 4px; margin-top: 0.55em;
+    border-radius: 50%; background: var(--accent);
+}
+
+/* Check / Cross list */
+.check-list { display: flex; flex-direction: column; gap: var(--elem-gap); }
+.check-list li {
+    display: flex; align-items: flex-start; gap: 0.6rem;
+    font-size: var(--body-size); color: var(--text-body); line-height: 1.5;
+}
+.check-list li.pos::before { content: '\2713'; color: var(--accent); font-family: var(--font-mono); flex-shrink: 0; font-weight: 700; }
+.check-list li.neg::before { content: '\2717'; color: var(--red); font-family: var(--font-mono); flex-shrink: 0; font-weight: 700; }
+
+/* Grid layouts */
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(0.5rem, 1.5vw, 1rem);
+}
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(0.5rem, 1.2vw, 0.8rem);
+}
+@media (max-width: 768px) {
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Two column */
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: center;
+    width: 100%;
+    max-width: min(90vw, 1100px);
+}
+
+/* Image placeholder */
+.img-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    max-height: min(50vh, 400px);
+    min-height: clamp(120px, 25vh, 250px);
+    padding: clamp(1rem, 2vw, 2rem);
+    text-align: center;
+}
+.img-placeholder .ph-label {
+    font-size: var(--body-size);
+    color: var(--text-muted);
+}
+.img-placeholder .ph-hint {
+    font-family: var(--font-mono);
+    font-size: var(--small-size);
+    color: rgba(255, 255, 255, 0.25);
+}
+
+/* Video wrapper */
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: min(85vw, 900px);
+    aspect-ratio: 16 / 9;
+    max-height: min(55vh, 500px);
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+}
+.video-wrapper iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: 0;
+}
+.video-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%; height: 100%;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-size: var(--body-size);
+}
+.video-placeholder .play-icon {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    opacity: 0.3;
+}
+
+/* ============================================================
+   SLIDE-SPECIFIC STYLES
+   ============================================================ */
+
+/* --- Slide 01: Title Hero --- */
+#s1 {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+.hero-inner {
+    position: relative; z-index: 1;
+    max-width: min(85vw, 900px);
+    display: flex; flex-direction: column; align-items: center;
+    gap: clamp(0.5rem, 1.5vh, 1.2rem);
+}
+.hero-pre {
+    font-family: var(--font-mono);
+    font-size: var(--small-size);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+.hero-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(3rem, 11vw, 9rem);
+    line-height: 0.9;
+    color: var(--text-light);
+    letter-spacing: -0.02em;
+}
+.hero-sub {
+    font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 500px;
+}
+
+/* --- Slide 02: What is OpenClaw --- */
+.intro-stat {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(0.3rem, 0.8vw, 0.6rem);
+    margin-bottom: clamp(0.3rem, 0.8vh, 0.6rem);
+}
+.intro-stat .num {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    color: var(--accent);
+    line-height: 1;
+}
+.intro-stat .unit {
+    font-family: var(--font-mono);
+    font-size: var(--small-size);
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+}
+
+/* --- Slide 03: Platform Architecture --- */
+.arch-diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.4rem, 1vh, 0.7rem);
+    width: 100%;
+    max-width: min(75vw, 700px);
+    margin: 0 auto;
+}
+.arch-row {
+    display: flex;
+    gap: clamp(0.3rem, 0.8vw, 0.6rem);
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.arch-node {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: clamp(0.5rem, 1vw, 0.8rem) clamp(0.8rem, 1.5vw, 1.2rem);
+    font-size: var(--small-size);
+    color: var(--text-body);
+    font-family: var(--font-mono);
+    text-align: center;
+    min-width: clamp(60px, 10vw, 100px);
+}
+.arch-node.core {
+    border-color: rgba(62, 207, 142, 0.3);
+    background: var(--accent-dim);
+    color: var(--accent);
+}
+.arch-connector {
+    width: 1px;
+    height: clamp(12px, 2vh, 20px);
+    background: var(--border-subtle);
+    margin: 0 auto;
+}
+
+/* --- Slide 04: E-commerce Stats --- */
+.stat-card {
+    text-align: center;
+    padding: clamp(1rem, 2vw, 1.8rem);
+}
+.stat-card .stat-num {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.8rem, 5vw, 3.5rem);
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: clamp(0.2rem, 0.5vh, 0.4rem);
+}
+.stat-card .stat-label {
+    font-size: var(--body-size);
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+/* --- Slides 05/06: Scenario Slides --- */
+.scenario-slide .slide-content {
+    align-items: center;
+    text-align: center;
+    gap: clamp(0.8rem, 2vh, 1.5rem);
+}
+
+/* --- Slide 07: Pain Points --- */
+.pain-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(0.5rem, 1.2vw, 1rem);
+    max-width: min(85vw, 900px);
+}
+@media (max-width: 600px) {
+    .pain-grid { grid-template-columns: 1fr; }
+}
+.pain-card {
+    padding: clamp(0.8rem, 1.5vw, 1.2rem);
+}
+.pain-card .pain-icon {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    margin-bottom: clamp(0.2rem, 0.5vh, 0.4rem);
+}
+.pain-card .pain-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--h3-size);
+    color: var(--text-light);
+    margin-bottom: clamp(0.15rem, 0.4vh, 0.3rem);
+}
+.pain-card .pain-desc {
+    font-size: var(--small-size);
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* --- Slides 08/09: Competitor --- */
+.competitor-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(0.5rem, 1.2vw, 1rem);
+    max-width: min(90vw, 1100px);
+    width: 100%;
+}
+.competitor-card {
+    padding: clamp(0.8rem, 1.5vw, 1.2rem);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.4rem, 0.8vh, 0.7rem);
+}
+.competitor-card .comp-header {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(0.5rem, 1vw, 0.8rem);
+    flex-wrap: wrap;
+}
+.competitor-card .comp-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--h3-size);
+    color: var(--text-light);
+}
+.competitor-card .comp-vendor {
+    font-size: var(--small-size);
+    color: var(--accent);
+    font-weight: 500;
+}
+.competitor-card .comp-screenshot {
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.competitor-card .comp-screenshot img {
+    width: 100%;
+    display: block;
+}
+.competitor-card .comp-screenshot .comp-img-placeholder {
+    font-size: var(--small-size);
+    color: rgba(255,255,255,0.25);
+    text-align: center;
+    padding: clamp(0.8rem, 1.5vw, 1.2rem);
+}
+.competitor-card .comp-desc {
+    font-size: var(--small-size);
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+.competitor-card .comp-desc strong {
+    color: var(--text-body);
+}
+
+.defect-list {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.5rem, 1.2vh, 0.9rem);
+    max-width: min(85vw, 800px);
+}
+.defect-item {
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(0.5rem, 1vw, 0.8rem);
+    font-size: var(--body-size);
+    color: var(--text-body);
+    line-height: 1.5;
+}
+.defect-item .x-mark {
+    color: var(--red);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 0.1em;
+}
+
+
+/* --- Slide 10: GetClawHub Hero --- */
+#s10 {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+.gch-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2rem, 6vw, 5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+.gch-title .accent { color: var(--accent); }
+
+/* --- Slide 11: Install Steps --- */
+.steps-row {
+    display: flex;
+    align-items: stretch;
+    gap: clamp(0.5rem, 1.5vw, 1.2rem);
+    max-width: min(90vw, 950px);
+}
+.step-card {
+    flex: 1;
+    padding: clamp(0.8rem, 1.5vw, 1.5rem);
+    text-align: center;
+}
+.step-num {
+    font-family: var(--font-mono);
+    font-size: var(--small-size);
+    color: var(--accent);
+    margin-bottom: clamp(0.3rem, 0.6vh, 0.5rem);
+}
+.step-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--h3-size);
+    color: var(--text-light);
+    margin-bottom: clamp(0.2rem, 0.5vh, 0.4rem);
+}
+.step-desc {
+    font-size: var(--small-size);
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* --- Slide 13: Feature Comparison --- */
+.compare-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(0.8rem, 2vw, 1.5rem);
+    max-width: min(85vw, 900px);
+}
+.compare-col {
+    padding: clamp(1rem, 2vw, 1.5rem);
+}
+.compare-col h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--h3-size);
+    margin-bottom: clamp(0.4rem, 1vh, 0.8rem);
+}
+.compare-col.them h4 { color: var(--text-muted); }
+.compare-col.us h4 { color: var(--accent); }
+
+/* --- Slide 14: Pricing --- */
+.price-box {
+    text-align: center;
+    max-width: min(80vw, 600px);
+    margin: 0 auto;
+}
+.price-big {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(3rem, 10vw, 8rem);
+    color: var(--accent);
+    line-height: 1;
+}
+.price-sub {
+    font-size: var(--body-size);
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-top: clamp(0.3rem, 0.8vh, 0.6rem);
+}
+
+/* --- Slide 15: Apple Silicon --- */
+.chip-row-center {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(0.3rem, 0.8vw, 0.6rem);
+    justify-content: center;
+}
+
+/* --- Slide 16: Migration --- */
+.migrate-compare {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: clamp(0.8rem, 2vw, 1.5rem);
+    align-items: center;
+    max-width: min(85vw, 850px);
+}
+.migrate-vs {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--h3-size);
+    color: var(--text-muted);
+}
+@media (max-width: 600px) {
+    .migrate-compare {
+        grid-template-columns: 1fr !important;
+    }
+    .migrate-vs { display: none; }
+}
+
+/* --- Slide 18: Summary --- */
+.summary-points {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.3rem, 0.8vh, 0.6rem);
+    max-width: min(80vw, 700px);
+}
+.summary-point {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.4rem, 1vw, 0.7rem);
+    font-size: var(--body-size);
+    color: var(--text-body);
+}
+.summary-point .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+}
+
+/* --- Slide 19: CTA --- */
+#s19 {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+.cta-url {
+    font-family: var(--font-mono);
+    font-size: clamp(1rem, 2.5vw, 1.6rem);
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    padding: clamp(0.4rem, 1vh, 0.7rem) clamp(1rem, 2vw, 2rem);
+    border: 1px solid rgba(62, 207, 142, 0.3);
+    border-radius: 8px;
+    background: var(--accent-dim);
+    display: inline-block;
+}
+
+/* ============================================================
+   EDIT MODE
+   ============================================================ */
+.edit-hotzone {
+    position: fixed; top: 0; left: 0;
+    width: 80px; height: 80px;
+    z-index: 10000;
+    cursor: pointer;
+}
+.edit-toggle {
+    position: fixed;
+    top: clamp(0.5rem, 1.5vw, 1rem);
+    right: clamp(3rem, 5vw, 5rem);
+    font-family: var(--font-body);
+    font-size: var(--small-size);
+    color: var(--text-light);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 0.35em 0.9em;
+    cursor: pointer;
+    z-index: 10001;
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.3s, background 0.3s;
+}
+.edit-toggle:hover { background: var(--bg-card-hover); }
+.edit-toggle.active {
+    background: var(--accent-dim);
+    border-color: rgba(62, 207, 142, 0.3);
+    color: var(--accent);
+}
+
+.save-toast {
+    position: fixed;
+    bottom: clamp(1rem, 2vh, 1.5rem);
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: var(--small-size);
+    padding: 0.5em 1.2em;
+    border-radius: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 10002;
+}
+.save-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Edit mode visual cue */
+body.edit-mode [contenteditable="true"] {
+    outline: 1px dashed rgba(62, 207, 142, 0.3);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+</style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Navigation dots -->
+<nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+
+<!-- Edit controls -->
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">&#9998; &#32;&#32;&#32;&#32;</button>
+<div class="save-toast" id="saveToast">&#10003; Saved</div>
+
+
+<!-- ===========================================================
+     SLIDE 01  —  TITLE HERO
+     =========================================================== -->
+<section class="slide" id="s1">
+    <div class="slide-num">01 / 19</div>
+    <div class="hero-inner stagger">
+        <p class="hero-pre reveal">OPEN SOURCE AI AGENT PLATFORM</p>
+        <h1 class="hero-title reveal">GetClawHub</h1>
+        <div class="divider accent center reveal"></div>
+        <p class="hero-sub reveal">
+            OpenClaw 的最佳本地安装方案<br>
+            一键部署，60 秒启动
+        </p>
+        <div class="chip-row-center reveal" style="margin-top: clamp(0.3rem, 0.8vh, 0.5rem);">
+            <span class="chip green">macOS</span>
+            <span class="chip">Apple Silicon</span>
+            <span class="chip">免费开始</span>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 02  —  WHAT IS OPENCLAW
+     =========================================================== -->
+<section class="slide" id="s2">
+    <div class="slide-num">02 / 19</div>
+    <div class="slide-content stagger">
+        <p class="label reveal">OPENCLAW</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.4rem,1vh,0.8rem);">什么是 OpenClaw？</h2>
+        <div class="two-col">
+            <div>
+                <div class="intro-stat reveal d3">
+                    <span class="num">250K+</span>
+                    <span class="unit">GitHub Stars</span>
+                </div>
+                <ul class="arrow-list reveal d4">
+                    <li>开源自主 AI Agent，由奥地利开发者 Peter Steinberger 创建</li>
+                    <li>支持 Claude / DeepSeek / GPT 等多模型后端</li>
+                    <li>通过 WhatsApp、Telegram、Discord 等平台操控</li>
+                    <li>能够完成复杂的多步骤自动化任务</li>
+                </ul>
+            </div>
+            <div class="reveal d5" style="text-align:center;">
+                <div class="m-card" style="padding:clamp(1.2rem,2.5vw,2rem);text-align:left;">
+                    <p style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--accent);margin-bottom:0.4em;">openclaw.ai</p>
+                    <p style="font-size:var(--body-size);color:var(--text-body);line-height:1.6;">
+                        独立开源项目<br>
+                        非 Anthropic / 非 Claude Code<br>
+                        模型无关 · 平台无关
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 03  —  PLATFORM ARCHITECTURE
+     =========================================================== -->
+<section class="slide" id="s3">
+    <div class="slide-num">03 / 19</div>
+    <div class="slide-content stagger" style="align-items:center;text-align:center;">
+        <p class="label reveal">ARCHITECTURE</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.5rem,1.5vh,1rem);">不只是应用，是平台</h2>
+        <div class="arch-diagram reveal d3">
+            <div class="arch-row">
+                <div class="arch-node">WhatsApp</div>
+                <div class="arch-node">Telegram</div>
+                <div class="arch-node">Discord</div>
+                <div class="arch-node">Web</div>
+            </div>
+            <div class="arch-connector"></div>
+            <div class="arch-row">
+                <div class="arch-node core">OpenClaw Agent Core</div>
+            </div>
+            <div class="arch-connector"></div>
+            <div class="arch-row">
+                <div class="arch-node">Claude</div>
+                <div class="arch-node">DeepSeek</div>
+                <div class="arch-node">GPT</div>
+                <div class="arch-node">Gemini</div>
+            </div>
+            <div class="arch-connector"></div>
+            <div class="arch-row">
+                <div class="arch-node" style="border-color:rgba(62,207,142,0.25);color:var(--accent);">本地文件系统</div>
+                <div class="arch-node" style="border-color:rgba(62,207,142,0.25);color:var(--accent);">浏览器</div>
+                <div class="arch-node" style="border-color:rgba(62,207,142,0.25);color:var(--accent);">终端</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 04  —  E-COMMERCE STATS
+     =========================================================== -->
+<section class="slide" id="s4">
+    <div class="slide-num">04 / 19</div>
+    <div class="slide-content stagger" style="align-items:center;text-align:center;">
+        <p class="label reveal">USE CASES</p>
+        <div class="grid-3 reveal d3">
+            <div class="m-card stat-card">
+                <div class="stat-num">+14%</div>
+                <div class="stat-label">商品转化率提升</div>
+            </div>
+            <div class="m-card stat-card">
+                <div class="stat-num">+77%</div>
+                <div class="stat-label">文案产出效率</div>
+            </div>
+            <div class="m-card stat-card">
+                <div class="stat-num">25h</div>
+                <div class="stat-label">每周节省工时</div>
+            </div>
+        </div>
+        <p class="reveal d4" style="font-size:var(--small-size);color:var(--text-muted);margin-top:clamp(0.3rem,0.8vh,0.6rem);">基于早期电商用户反馈数据</p>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 05  —  SCENARIO 1: SMART SELECTION
+     =========================================================== -->
+<section class="slide scenario-slide" id="s5">
+    <div class="slide-num">05 / 19</div>
+    <div class="slide-content stagger">
+        <p class="label reveal">USE CASES</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.3rem,0.8vh,0.6rem);">电商行业，已在用了</h2>
+        <p class="label reveal" style="margin-bottom:0.2em;">SCENARIO 01</p>
+        <h3 class="reveal" style="font-family:var(--font-display);font-weight:600;font-size:var(--h3-size);margin-bottom:clamp(0.3rem,0.8vh,0.6rem);">智能选品与知识库沉淀</h3>
+        <p class="reveal d3" style="font-size:var(--body-size);color:var(--text-muted);max-width:600px;margin:0 auto clamp(0.5rem,1.5vh,1rem);">
+            OpenClaw 分析市场数据、竞品信息，自动生成选品建议并沉淀为可复用的知识库
+        </p>
+        <div class="scenario-img-wrap reveal d4">
+            <img src="scene1.jpg" alt="智能选品与知识库沉淀" style="width:100%;max-width:700px;border-radius:12px;border:1px solid var(--border-subtle);">
+        </div>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 06  —  SCENARIO 2: BATCH LISTING
+     =========================================================== -->
+<section class="slide scenario-slide" id="s6">
+    <div class="slide-num">06 / 19</div>
+    <div class="slide-content stagger">
+        <p class="label reveal">SCENARIO 02</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.3rem,0.8vh,0.6rem);">批量上架 — 知识库调取与 SEO 重写</h2>
+        <p class="reveal d3" style="font-size:var(--body-size);color:var(--text-muted);max-width:600px;margin:0 auto clamp(0.5rem,1.5vh,1rem);">
+            从知识库调取产品信息，自动生成 SEO 优化的标题与描述，批量上架到多个平台
+        </p>
+        <p class="label reveal" style="margin-bottom:0.2em;">SCENARIO 02</p>
+        <h3 class="reveal" style="font-family:var(--font-display);font-weight:600;font-size:var(--h3-size);margin-bottom:clamp(0.3rem,0.8vh,0.6rem);">批量上架 — 知识库调取与 SEO 重写</h3>
+        <p class="reveal d3" style="font-size:var(--body-size);color:var(--text-muted);max-width:600px;margin:0 auto clamp(0.5rem,1.5vh,1rem);">
+            从知识库调取产品信息，自动生成 SEO 优化的标题与描述，批量上架到多个平台
+        </p>
+        <div class="scenario-img-wrap reveal d4">
+            <img src="scene2.png" alt="批量上架与 SEO 重写" style="width:100%;max-width:700px;border-radius:12px;border:1px solid var(--border-subtle);">
+        </div>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 07  —  PAIN POINTS
+     =========================================================== -->
+<section class="slide" id="s7">
+    <div class="slide-num">07 / 19</div>
+    <div class="slide-content stagger" style="align-items:center;">
+        <p class="label reveal">THE PROBLEM</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.5rem,1.5vh,1rem);">听起来很好，但用起来很难</h2>
+        <div class="pain-grid">
+            <div class="m-card pain-card reveal d3">
+                <div class="pain-icon">&#9881;</div>
+                <div class="pain-title">环境配置复杂</div>
+                <div class="pain-desc">Node.js、Python、依赖管理……非技术用户看到终端就劝退</div>
+            </div>
+            <div class="m-card pain-card reveal d4">
+                <div class="pain-icon">&#128273;</div>
+                <div class="pain-title">API Key 门槛</div>
+                <div class="pain-desc">需要注册多个服务、理解 Token 计费，配置出错就报错</div>
+            </div>
+            <div class="m-card pain-card reveal d5">
+                <div class="pain-icon">&#9888;</div>
+                <div class="pain-title">运行不稳定</div>
+                <div class="pain-desc">长时间任务掉线、进程管理困难、日志分散难排查</div>
+            </div>
+            <div class="m-card pain-card reveal d6">
+                <div class="pain-icon">&#128260;</div>
+                <div class="pain-title">更新麻烦</div>
+                <div class="pain-desc">手动 git pull、解决冲突、重装依赖，每次更新都像重新部署</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 08  —  BIG TECH ENTERS
+     =========================================================== -->
+<section class="slide" id="s8">
+    <div class="slide-num">08 / 19</div>
+    <div class="slide-content stagger" style="align-items:center;">
+        <p class="label reveal">COMPETITION</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.5rem,1.5vh,1rem);">大厂已经入场了</h2>
+        <p class="reveal d3" style="font-size:var(--body-size);color:var(--text-muted);margin-bottom:clamp(0.5rem,1.5vh,0.8rem);max-width:850px;text-align:center;">
+            多家大厂相继推出基于 OpenClaw 的封装产品，试图抢占这个新兴赛道的先机
+        </p>
+        <div class="competitor-grid">
+            <div class="m-card competitor-card reveal d4">
+                <div class="comp-header">
+                    <span class="comp-name">KimiClaw</span>
+                    <span class="comp-vendor">月之暗面 · Kimi 团队</span>
+                </div>
+                <div class="comp-screenshot">
+                    <img src="kimiclaw.png" alt="KimiClaw 界面截图">
+                </div>
+                <div class="comp-desc">
+                    <strong>产品定位：</strong>长上下文 AI 助手 + OpenClaw 任务自动化深度集成，主打 20 万字超长上下文理解与多步骤复杂任务编排。<br><br>
+                    <strong>核心能力：</strong>基于 Kimi 超长上下文模型，结合 OpenClaw 的多 Agent 协同能力，实现从文档阅读到任务执行的全链路自动化。支持本地文件索引、网页内容摘要提取、以及跨对话的记忆复用。<br><br>
+                    <strong>目标用户：</strong>内容创作者、法律/金融从业者、需要处理大量长文档的专业人士，以及需要 AI 代理完成复杂多步骤操作的商务用户。<br><br>
+                    <strong>当前版本：</strong>v1.2（基于 OpenClaw v3.1.x），支持 Claude 3.5 / DeepSeek Chat 双模型切换。
+                </div>
+            </div>
+            <div class="m-card competitor-card reveal d5">
+                <div class="comp-header">
+                    <span class="comp-name">MaxClaw</span>
+                    <span class="comp-vendor">稀宇科技 · MiniMax</span>
+                </div>
+                <div class="comp-screenshot">
+                    <img src="maxclaw.png" alt="MaxClaw 界面截图">
+                </div>
+                <div class="comp-desc">
+                    <strong>产品定位：</strong>企业级 AI Agent 平台，聚焦多模态内容生成与 OpenClaw 工作流自动化结合，主打视频脚本生成、图文创意策划等创意类任务。<br><br>
+                    <strong>核心能力：</strong>依托 MiniMax 自研多模态大模型，将 OpenClaw 的自动化执行能力与音视频内容理解深度融合。内置创意库、品牌资产管理系统，支持一键生成营销内容并自动发布至电商平台与社交媒体。<br><br>
+                    <strong>目标用户：</strong>电商运营团队、品牌市场部门、MCN 机构，以及需要批量生产内容的创意营销人员。<br><br>
+                    <strong>当前版本：</strong>v2.0（基于 OpenClaw v3.2.x），是国内最早跟进 OpenClaw v3.x 大版本更新的封装产品之一。
+                </div>
+            </div>
+            <div class="m-card competitor-card reveal d6">
+                <div class="comp-header">
+                    <span class="comp-name">QClaw</span>
+                    <span class="comp-vendor">阿里巴巴 · 通义实验室</span>
+                </div>
+                <div class="comp-screenshot">
+                    <img src="qclaw.png" alt="QClaw 界面截图" onerror="this.parentElement.innerHTML='<div class=comp-img-placeholder>QClaw 截图<br><small>（暂无图片）</small></div>'">
+                </div>
+                <div class="comp-desc">
+                    <strong>产品定位：</strong>代码助手 + 企业知识库 Agent，基于阿里云通义千问 + OpenClaw 框架，主打代码评审、Bug 修复与企业内部知识库问答。<br><br>
+                    <strong>核心能力：</strong>深度集成阿里云 OSS、MaxCompute 与钉钉生态，支持从代码仓库自动生成文档、从日志自动定位问题根因。内置企业级权限管理与审计日志，适合中大型技术团队使用。<br><br>
+                    <strong>目标用户：</strong>企业技术团队、DevOps 工程师、以及需要 AI 辅助进行代码审计与知识管理的机构。<br><br>
+                    <strong>当前版本：</strong>v1.5（基于 OpenClaw v2.9.x），与通义千问 API 无缝对接，支持私有化部署。
+                </div>
+            </div>
+            <div class="m-card competitor-card reveal d7">
+                <div class="comp-header">
+                    <span class="comp-name">CoPaw</span>
+                    <span class="comp-vendor">腾讯 · 云与智慧产业事业群</span>
+                </div>
+                <div class="comp-screenshot">
+                    <img src="copaw.png" alt="CoPaw 界面截图" onerror="this.parentElement.innerHTML='<div class=comp-img-placeholder>CoPaw 截图<br><small>（暂无图片）</small></div>'">
+                </div>
+                <div class="comp-desc">
+                    <strong>产品定位：</strong>协作式 AI Agent，嵌入腾讯文档、腾讯会议与企业微信生态，主打团队协作场景下的任务分发、进度追踪与智能摘要。<br><br>
+                    <strong>核心能力：</strong>基于腾讯混元大模型与 OpenClaw 的多 Agent 协同引擎，实现会议纪要自动生成、任务列表智能拆解、跨团队进度同步。无需切换应用，在微信与企业微信中直接唤起 AI 辅助。<br><br>
+                    <strong>目标用户：</strong>企业管理者、项目经理、销售与客服团队，以及需要在腾讯生态内完成大量协调性工作的办公人群。<br><br>
+                    <strong>当前版本：</strong>v1.8（基于 OpenClaw v3.0.x），通过企业微信小程序交付，支持扫码即用。
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 09  —  COMPETITOR DEFECTS
+     =========================================================== -->
+<section class="slide" id="s9">
+    <div class="slide-num">09 / 19</div>
+    <div class="slide-content stagger" style="align-items:center;">
+        <p class="label reveal">LIMITATIONS</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.5rem,1.5vh,1rem);">但他们的产品有根本缺陷</h2>
+        <div class="defect-list">
+            <div class="defect-item reveal d3">
+                <span class="x-mark">&#10007;</span>
+                <span><strong>无法操作本地文件</strong> — Agent 被限制在云端沙箱中，无法读写你电脑上的真实文件</span>
+            </div>
+            <div class="defect-item reveal d4">
+                <span class="x-mark">&#10007;</span>
+                <span><strong>阉割核心功能</strong> — 为了"安全"移除了 OpenClaw 的终端执行、浏览器控制等核心能力</span>
+            </div>
+            <div class="defect-item reveal d5">
+                <span class="x-mark">&#10007;</span>
+                <span><strong>绑定自家生态</strong> — 只能用他们的模型、他们的云服务，迁移成本极高</span>
+            </div>
+            <div class="defect-item reveal d6">
+                <span class="x-mark">&#10007;</span>
+                <span><strong>更新不同步</strong> — OpenClaw 上游更新后，大厂封装版往往滞后数周甚至数月</span>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 10  —  INTRODUCING GETCLAWHUB
+     =========================================================== -->
+<section class="slide" id="s10">
+    <div class="slide-num">10 / 19</div>
+    <div class="hero-inner stagger" style="margin:auto;">
+        <p class="label reveal" style="text-align:center;">THE SOLUTION</p>
+        <h2 class="gch-title reveal">Introducing<br><span class="accent">GetClawHub</span></h2>
+        <div class="divider accent center reveal"></div>
+        <p class="reveal d4" style="font-size:var(--body-size);color:var(--text-muted);text-align:center;max-width:550px;line-height:1.7;">
+            完整的 OpenClaw，零阉割<br>
+            本地运行，一键安装，60 秒启动
+        </p>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 11  —  ONE-CLICK INSTALL
+     =========================================================== -->
+<section class="slide" id="s11">
+    <div class="slide-num">11 / 19</div>
+    <div class="slide-content stagger" style="align-items:center;text-align:center;">
+        <p class="label reveal">SETUP</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.5rem,1.5vh,1rem);">一键安装，60 秒启动</h2>
+        <div class="steps-row reveal d3">
+            <div class="m-card step-card">
+                <div class="step-num">01</div>
+                <div class="step-title">下载</div>
+                <div class="step-desc">从 getclawhub.com 下载 .dmg 安装包</div>
+            </div>
+            <div class="m-card step-card">
+                <div class="step-num">02</div>
+                <div class="step-title">安装</div>
+                <div class="step-desc">拖入 Applications，双击启动</div>
+            </div>
+            <div class="m-card step-card">
+                <div class="step-num">03</div>
+                <div class="step-title">使用</div>
+                <div class="step-desc">向导引导配置 API Key，开始工作</div>
+            </div>
+        </div>
+        <p class="reveal d4" style="font-size:var(--small-size);color:var(--text-muted);margin-top:clamp(0.3rem,0.8vh,0.5rem);">
+            无需 Node.js · 无需终端 · 无需手动配置环境
+        </p>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 12  —  DEMO VIDEO
+     =========================================================== -->
+<section class="slide" id="s12">
+    <div class="slide-num">12 / 19</div>
+    <div class="slide-content stagger" style="align-items:center;text-align:center;">
+        <p class="label reveal">DEMO</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.5rem,1.5vh,1rem);">看看实际效果</h2>
+        <!-- 替换 VIDEO_ID 为实际 YouTube 视频 ID -->
+        <div class="video-wrapper reveal d3">
+            <div class="video-placeholder">
+                <span class="play-icon">&#9654;</span>
+                <span>视频占位 — 替换 VIDEO_ID 为实际 YouTube ID</span>
+                <span style="font-family:var(--font-mono);font-size:var(--small-size);color:rgba(255,255,255,0.2);">
+                    &lt;iframe src="https://www.youtube.com/embed/VIDEO_ID"&gt;
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 13  —  FULL FEATURES, NO CRIPPLING
+     =========================================================== -->
+<section class="slide" id="s13">
+    <div class="slide-num">13 / 19</div>
+    <div class="slide-content stagger" style="align-items:center;">
+        <p class="label reveal">COMPARISON</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.5rem,1.5vh,1rem);">功能完整，零阉割</h2>
+        <div class="compare-row">
+            <div class="m-card compare-col them reveal d3">
+                <h4>大厂封装</h4>
+                <ul class="check-list">
+                    <li class="neg">无法操作本地文件</li>
+                    <li class="neg">终端执行被移除</li>
+                    <li class="neg">浏览器控制被阉割</li>
+                    <li class="neg">绑定单一模型</li>
+                    <li class="neg">更新滞后</li>
+                </ul>
+            </div>
+            <div class="m-card compare-col us reveal d4">
+                <h4>GetClawHub</h4>
+                <ul class="check-list">
+                    <li class="pos">完整本地文件读写</li>
+                    <li class="pos">终端执行能力</li>
+                    <li class="pos">浏览器自动化控制</li>
+                    <li class="pos">多模型自由切换</li>
+                    <li class="pos">与 OpenClaw 同步更新</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 14  —  FREE $2 TRIAL
+     =========================================================== -->
+<section class="slide" id="s14">
+    <div class="slide-num">14 / 19</div>
+    <div class="slide-content stagger" style="align-items:center;text-align:center;">
+        <p class="label reveal">PRICING</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.3rem,0.8vh,0.6rem);">免费体验，无需先付费</h2>
+        <div class="price-box">
+            <div class="price-big reveal d3">$2</div>
+            <p class="price-sub reveal d4">
+                注册 API 即获 $2 免费额度<br>
+                足够体验完整功能，无需信用卡
+            </p>
+        </div>
+        <div class="divider center reveal d5"></div>
+        <ul class="arrow-list reveal d6" style="align-items:center;">
+            <li>用完再决定是否充值</li>
+            <li>按量计费，用多少付多少</li>
+            <li>不满意，随时一键卸载</li>
+        </ul>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 15  —  APPLE SILICON
+     =========================================================== -->
+<section class="slide" id="s15">
+    <div class="slide-num">15 / 19</div>
+    <div class="slide-content stagger" style="align-items:center;text-align:center;">
+        <p class="label reveal">PERFORMANCE</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.5rem,1.5vh,1rem);">Apple Silicon 原生适配</h2>
+        <p class="reveal d3" style="font-size:var(--body-size);color:var(--text-body);max-width:550px;line-height:1.7;">
+            针对 M1 / M2 / M3 / M4 芯片原生编译<br>
+            无需 Rosetta 转译，性能最大化
+        </p>
+        <div class="chip-row-center reveal d4" style="margin-top:clamp(0.5rem,1.2vh,0.8rem);">
+            <span class="chip green">M1</span>
+            <span class="chip green">M2</span>
+            <span class="chip green">M3</span>
+            <span class="chip green">M4</span>
+        </div>
+        <div class="divider center reveal d5"></div>
+        <p class="reveal d6" style="font-size:var(--small-size);color:var(--text-muted);max-width:480px;">
+            启动更快 · 内存更省 · 续航更长<br>
+            自动识别芯片架构，无需手动选择版本
+        </p>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 16  —  ZERO MIGRATION COST
+     =========================================================== -->
+<section class="slide" id="s16">
+    <div class="slide-num">16 / 19</div>
+    <div class="slide-content stagger" style="align-items:center;text-align:center;">
+        <p class="label reveal">MIGRATION</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.5rem,1.5vh,1rem);">迁移成本为零</h2>
+        <div class="migrate-compare reveal d3">
+            <div class="m-card compare-col" style="text-align:left;">
+                <h4 style="color:var(--text-muted);font-family:var(--font-display);font-weight:600;font-size:var(--h3-size);margin-bottom:0.5em;">大厂封装</h4>
+                <p style="font-size:var(--body-size);color:var(--text-muted);line-height:1.6;">
+                    每换一个平台<br>
+                    重新配置环境<br>
+                    重新训练 Agent<br>
+                    历史记忆全部丢失
+                </p>
+            </div>
+            <div class="migrate-vs">vs</div>
+            <div class="m-card compare-col" style="text-align:left;border-color:rgba(62,207,142,0.2);">
+                <h4 style="color:var(--accent);font-family:var(--font-display);font-weight:600;font-size:var(--h3-size);margin-bottom:0.5em;">GetClawHub</h4>
+                <p style="font-size:var(--body-size);color:var(--text-body);line-height:1.6;">
+                    识别本地已有 OpenClaw 安装<br>
+                    继承所有配置和记忆<br>
+                    无缝切换，零学习成本
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 17  —  AUTO UPDATE
+     =========================================================== -->
+<section class="slide" id="s17">
+    <div class="slide-num">17 / 19</div>
+    <div class="slide-content stagger" style="align-items:center;text-align:center;">
+        <p class="label reveal">UPDATES</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.5rem,1.5vh,1rem);">自动更新通知</h2>
+        <div class="m-card reveal d3" style="max-width:min(75vw,550px);padding:clamp(1.2rem,2.5vw,2rem);text-align:left;">
+            <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:clamp(0.4rem,1vh,0.7rem);">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);"></span>
+                <span style="font-family:var(--font-display);font-weight:600;font-size:var(--h3-size);">OpenClaw v3.2.1 可用</span>
+            </div>
+            <p style="font-size:var(--body-size);color:var(--text-muted);line-height:1.6;margin-bottom:clamp(0.4rem,1vh,0.7rem);">
+                新增：多窗口并行任务 · 修复：长时任务断线重连 · 优化：内存占用降低 30%
+            </p>
+            <span class="chip green">一键升级</span>
+        </div>
+        <p class="reveal d4" style="font-size:var(--small-size);color:var(--text-muted);margin-top:clamp(0.3rem,0.8vh,0.5rem);max-width:450px;">
+            OpenClaw 上游发布新版本时自动推送通知<br>
+            告别手动 git pull + 解决冲突
+        </p>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 18  —  SUMMARY
+     =========================================================== -->
+<section class="slide" id="s18">
+    <div class="slide-num">18 / 19</div>
+    <div class="slide-content stagger" style="align-items:center;text-align:center;">
+        <p class="label reveal">SUMMARY</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:700;font-size:var(--h2-size);margin-bottom:clamp(0.5rem,1.5vh,1rem);">降低门槛，不降低标准</h2>
+        <div class="summary-points reveal d3">
+            <div class="summary-point">
+                <span class="dot"></span>
+                <span>完整的 OpenClaw 功能，没有任何阉割</span>
+            </div>
+            <div class="summary-point">
+                <span class="dot"></span>
+                <span>一键安装，非技术用户也能 60 秒上手</span>
+            </div>
+            <div class="summary-point">
+                <span class="dot"></span>
+                <span>Apple Silicon 原生适配，性能最大化</span>
+            </div>
+            <div class="summary-point">
+                <span class="dot"></span>
+                <span>零迁移成本，继承本地已有配置和记忆</span>
+            </div>
+            <div class="summary-point">
+                <span class="dot"></span>
+                <span>自动更新通知，始终保持最新版本</span>
+            </div>
+            <div class="summary-point">
+                <span class="dot"></span>
+                <span>$2 免费额度，零风险体验</span>
+            </div>
+        </div>
+        <div class="divider accent center reveal d4"></div>
+        <p class="reveal d5" style="font-size:var(--body-size);color:var(--text-muted);max-width:500px;line-height:1.7;">
+            让每个人都能用上最强大的 AI Agent<br>
+            而不只是会配环境的那些人
+        </p>
+    </div>
+</section>
+
+
+<!-- ===========================================================
+     SLIDE 19  —  CTA
+     =========================================================== -->
+<section class="slide" id="s19">
+    <div class="slide-num">19 / 19</div>
+    <div class="hero-inner stagger" style="margin:auto;">
+        <p class="label reveal" style="text-align:center;">GET STARTED</p>
+        <h2 class="reveal" style="font-family:var(--font-display);font-weight:800;font-size:clamp(2rem,5vw,4rem);text-align:center;">
+            立即体验
+        </h2>
+        <div class="divider accent center reveal"></div>
+        <p class="reveal d4" style="font-size:var(--body-size);color:var(--text-muted);text-align:center;line-height:1.7;">
+            免费下载 · 无需信用卡 · 一键安装<br>
+            体验不满意，随时一键卸载
+        </p>
+        <div class="cta-url reveal d5">getclawhub.com</div>
+        <div class="chip-row-center reveal d6" style="margin-top:clamp(0.3rem,0.8vh,0.5rem);">
+            <span class="chip green">Mac M1-M4</span>
+            <span class="chip">$0 开始</span>
+            <span class="chip">SHA-256 验证</span>
+        </div>
+    </div>
+</section>
+
+
+<script>
+/* ============================================================
+   SLIDE PRESENTATION CONTROLLER
+   ============================================================ */
+class SlidePresentation {
+    constructor() {
+        this.slides     = Array.from(document.querySelectorAll('.slide'));
+        this.total      = this.slides.length;
+        this.current    = 0;
+        this.bar        = document.getElementById('progressBar');
+        this.navEl      = document.getElementById('navDots');
+        this.touchY     = 0;
+        this.wheelLock  = false;
+
+        this._buildDots();
+        this._observe();
+        this._keyboard();
+        this._touch();
+        this._wheel();
+        this._updateProgress(0);
+    }
+
+    _buildDots() {
+        this.slides.forEach((_, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            btn.setAttribute('aria-label', `Slide ${i + 1}`);
+            btn.addEventListener('click', () => this.go(i));
+            this.navEl.appendChild(btn);
+        });
+        this.dots = Array.from(this.navEl.querySelectorAll('.nav-dot'));
+    }
+
+    _observe() {
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (!e.isIntersecting) return;
+                e.target.classList.add('visible');
+                const idx = this.slides.indexOf(e.target);
+                if (idx < 0) return;
+                this.current = idx;
+                this._updateDots(idx);
+                this._updateProgress(idx);
+            });
+        }, { threshold: 0.5 });
+        this.slides.forEach(s => io.observe(s));
+    }
+
+    _keyboard() {
+        document.addEventListener('keydown', e => {
+            if (document.activeElement?.getAttribute('contenteditable')) return;
+            switch (e.key) {
+                case 'ArrowDown': case 'ArrowRight': case ' ': case 'PageDown':
+                    e.preventDefault(); this.go(this.current + 1); break;
+                case 'ArrowUp': case 'ArrowLeft': case 'PageUp':
+                    e.preventDefault(); this.go(this.current - 1); break;
+                case 'Home': e.preventDefault(); this.go(0); break;
+                case 'End':  e.preventDefault(); this.go(this.total - 1); break;
+            }
+        });
+    }
+
+    _touch() {
+        document.addEventListener('touchstart', e => {
+            this.touchY = e.touches[0].clientY;
+        }, { passive: true });
+        document.addEventListener('touchend', e => {
+            const delta = this.touchY - e.changedTouches[0].clientY;
+            if (Math.abs(delta) > 48) this.go(this.current + (delta > 0 ? 1 : -1));
+        }, { passive: true });
+    }
+
+    _wheel() {
+        document.addEventListener('wheel', e => {
+            e.preventDefault();
+            if (this.wheelLock) return;
+            this.wheelLock = true;
+            this.go(this.current + (e.deltaY > 0 ? 1 : -1));
+            setTimeout(() => { this.wheelLock = false; }, 700);
+        }, { passive: false });
+    }
+
+    go(idx) {
+        const clamped = Math.max(0, Math.min(this.total - 1, idx));
+        if (clamped === this.current) return;
+        this.current = clamped;
+        this.slides[clamped].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this._updateDots(clamped);
+        this._updateProgress(clamped);
+    }
+
+    _updateDots(idx) {
+        this.dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+
+    _updateProgress(idx) {
+        const pct = this.total > 1 ? (idx / (this.total - 1)) * 100 : 100;
+        if (this.bar) this.bar.style.width = pct + '%';
+    }
+}
+
+/* ============================================================
+   INLINE EDITOR
+   ============================================================ */
+class InlineEditor {
+    constructor() {
+        this.active      = false;
+        this.editables   = [];
+        this.btn         = document.getElementById('editToggle');
+        this.hotzone     = document.getElementById('editHotzone');
+        this.toast       = document.getElementById('saveToast');
+        this.toastTimer  = null;
+
+        this._setupHotzone();
+        this._setupShortcuts();
+        this._restore();
+    }
+
+    _setupHotzone() {
+        this.btn.addEventListener('click', () => this.toggle());
+        this.hotzone.addEventListener('click', () => this.toggle());
+    }
+
+    _setupShortcuts() {
+        document.addEventListener('keydown', e => {
+            if ((e.key === 'e' || e.key === 'E') &&
+                !e.ctrlKey && !e.metaKey &&
+                !document.activeElement?.getAttribute('contenteditable')) {
+                this.toggle();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                if (this.active) this._save();
+            }
+        });
+    }
+
+    get isActive() { return this.active; }
+
+    toggle() {
+        this.active = !this.active;
+        document.body.classList.toggle('edit-mode', this.active);
+        this.btn.textContent = this.active ? '\u2713 \u5B8C\u6210' : '\u270E \u7F16\u8F91';
+        this.btn.classList.toggle('active', this.active);
+
+        if (this.active) {
+            this._makeEditable();
+        } else {
+            this._clearEditable();
+            this._save();
+        }
+    }
+
+    _makeEditable() {
+        const sel = [
+            'h1','h2','h3','h4','p:not(.label)',
+            '.pain-title','.pain-desc',
+            '.step-title','.step-desc',
+            '.stat-num','.stat-label',
+            '.comp-name','.comp-desc',
+            '.hero-sub','.price-sub',
+            '.ph-label','.summary-point span:last-child',
+            '.chip'
+        ].join(',');
+
+        this.editables = [];
+        document.querySelectorAll(sel).forEach(el => {
+            if (el.closest('.nav-dots, .edit-toggle, .slide-num, .progress-bar, .save-toast, .edit-hotzone')) return;
+            el.setAttribute('contenteditable', 'true');
+            this.editables.push(el);
+        });
+    }
+
+    _clearEditable() {
+        this.editables.forEach(el => el.removeAttribute('contenteditable'));
+        this.editables = [];
+    }
+
+    _save() {
+        const data = {};
+        let i = 0;
+        const sel = [
+            'h1','h2','h3','h4','p:not(.label)',
+            '.pain-title','.pain-desc',
+            '.step-title','.step-desc',
+            '.stat-num','.stat-label',
+            '.comp-name','.comp-desc',
+            '.hero-sub','.price-sub',
+            '.ph-label','.summary-point span:last-child',
+            '.chip'
+        ].join(',');
+
+        document.querySelectorAll(sel).forEach(el => {
+            if (el.closest('.nav-dots, .edit-toggle, .slide-num, .progress-bar, .save-toast, .edit-hotzone')) return;
+            const id = 'gch-' + i++;
+            el.dataset.eid = id;
+            data[id] = el.innerHTML;
+        });
+
+        try {
+            localStorage.setItem('gch-slides-v2', JSON.stringify(data));
+            this._showToast();
+        } catch(err) {
+            console.warn('Save failed:', err);
+        }
+    }
+
+    _restore() {
+        try {
+            const raw = localStorage.getItem('gch-slides-v2');
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            let i = 0;
+            const sel = [
+                'h1','h2','h3','h4','p:not(.label)',
+                '.pain-title','.pain-desc',
+                '.step-title','.step-desc',
+                '.stat-num','.stat-label',
+                '.comp-name','.comp-desc',
+                '.hero-sub','.price-sub',
+                '.ph-label','.summary-point span:last-child',
+                '.chip'
+            ].join(',');
+
+            document.querySelectorAll(sel).forEach(el => {
+                if (el.closest('.nav-dots, .edit-toggle, .slide-num, .progress-bar, .save-toast, .edit-hotzone')) return;
+                const id = 'gch-' + i++;
+                const saved = data[id];
+                if (saved !== undefined) el.innerHTML = saved;
+            });
+        } catch(err) {
+            console.warn('Restore failed:', err);
+        }
+    }
+
+    _showToast() {
+        clearTimeout(this.toastTimer);
+        this.toast.classList.add('show');
+        this.toastTimer = setTimeout(() => this.toast.classList.remove('show'), 2200);
+    }
+}
+
+/* Init */
+const presentation = new SlidePresentation();
+const editor       = new InlineEditor();
+</script>
+</body>
+</html>
